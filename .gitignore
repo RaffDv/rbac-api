@@ -12,6 +12,11 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+
+# not important
+requirements.txt
+
+
 # OS
 .DS_Store
 
