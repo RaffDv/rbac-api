@@ -7,5 +7,6 @@ import { AbilityModule } from "src/ability/ability.module";
 	controllers: [UserController],
 	providers: [UserService],
 	imports: [AbilityModule],
+	exports: [UserService],
 })
 export class UserModule {}

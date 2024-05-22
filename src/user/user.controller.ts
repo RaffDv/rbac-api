@@ -21,23 +21,18 @@ import {
 	CheckAbilites,
 	ReadUserAbility,
 } from "src/ability/abilities.decorator";
-import currentUser from "./curent-user";
-import { abilitiesGuard } from "src/ability/abilites.guard";
 
 @Controller("user")
 export class UserController {
-	constructor(
-		private readonly userService: UserService,
-		private abilityFactory: AbilityFactory,
-	) {}
+	constructor(private readonly userService: UserService) {}
 
 	@Post()
+	@CheckAbilites({
+		action: Action.CREATE,
+		subject: User,
+	})
 	create(@Body() createUserDto: CreateUserDto) {
-		const ability = this.abilityFactory.defineAbility(currentUser);
-
 		try {
-			ForbiddenError.from(ability).throwUnlessCan(Action.CREATE, User);
-
 			return this.userService.create(createUserDto);
 		} catch (error) {
 			if (error instanceof ForbiddenError) {
@@ -48,25 +43,34 @@ export class UserController {
 	}
 
 	@Get()
-	@UseGuards(abilitiesGuard)
+	@CheckAbilites(new ReadUserAbility())
 	findAll() {
 		return this.userService.findAll();
 	}
 
-	@Get(":id")
-	@UseGuards(abilitiesGuard)
-	findOne(@Param("id") id: string) {
-		return this.userService.findOne(+id);
+	@Get(":username")
+	@CheckAbilites(new ReadUserAbility())
+	findOne(@Param("username") username: string) {
+		return this.userService.findOne(username);
 	}
 
-	@Patch(":id")
+	@Patch(":username")
 	@CheckAbilites({
 		action: Action.UPDATE,
 		subject: User,
 	})
-	update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
+	update(
+		@Param("username") username: string,
+		@Body() updateUserDto: UpdateUserDto,
+	) {
+		const LoggedUser = new User();
+		(LoggedUser.username = "admin"),
+			(LoggedUser.first_name = "admin"),
+			// biome-ignore lint/style/noCommaOperator: <explanation>
+			(LoggedUser.isAdmin = false),
+			(LoggedUser.password = "12345senha");
 		try {
-			return this.userService.update(+id, updateUserDto, currentUser);
+			return this.userService.update(username, updateUserDto, LoggedUser);
 		} catch (error) {
 			if (error instanceof ForbiddenError) {
 				throw new ForbiddenException(error.message);

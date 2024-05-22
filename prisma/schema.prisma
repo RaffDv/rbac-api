@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model Role {
+//   id         Int       @unique @default(autoincrement())
+//   name       String    @db.VarChar()
+//   created_at DateTime  @default(now())
+//   updated_at DateTime? @updatedAt()
+//   deleted_at DateTime? @db.Timestamp()
+//   User       User[]
+
+//   @@map("roles")
+// }
+
+// model Permission {
+//   id         Int     @unique @default(autoincrement())
+//   role       Role    @relation(fields: [role_id], references: [id])
+//   role_id    Int     @db.Integer()
+//   action     String  @db.VarChar()
+//   subject    String  @db.VarChar()
+//   inverted   Boolean @default(false)
+//   conditions Json?   @db.JsonB()
+//   reason     String? @db.Text()
+
+//   created_at DateTime  @default(now())
+//   updated_at DateTime? @updatedAt()
+//   deleted_at DateTime? @db.Timestamp()
+
+//   @@map("permissions")
+// }
+
+model User {
+  id         Int     @unique @default(autoincrement())
+  first_name String  @db.VarChar(100)
+  last_name  String? @db.VarChar(100)
+  username   String  @unique @db.VarChar(255)
+  isAdmin    Boolean @db.Boolean
+  password   String  @db.VarChar(255)
+
+  @@map("users")
+}

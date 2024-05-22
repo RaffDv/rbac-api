@@ -22,30 +22,19 @@ export type AppAbility = MongoAbility<[Action, Subject]>;
 
 @Injectable()
 export class AbilityFactory {
-	defineAbility(user: User) {
+	defineAbility(user: User): AppAbility {
 		const { can, cannot, build } = new AbilityBuilder<AppAbility>(
 			createMongoAbility,
 		);
 		if (user.isAdmin) {
-			// granted permissions
 			can(Action.MANAGE, "all");
-
-			// denied permissions
-			cannot(Action.MANAGE, User, {
-				orgId: { $ne: user.orgId },
-			}).because("you can only manage users in own organization");
 		} else {
-			// granted permissions
 			can(Action.READ, "all");
-			can(Action.UPDATE, User, {
-				id: user.id,
-			});
 
-			// denied permissions
 			cannot(Action.DELETE, User).because("You don't have that permission");
-			cannot(Action.UPDATE, User, {
-				id: { $ne: user.id },
-			}).because("You don't have that permission");
+
+			cannot(Action.UPDATE, User).because("You don't have that permission");
+			can(Action.UPDATE, User, { id: { $eq: user.id } });
 		}
 
 		return build({

@@ -4,39 +4,70 @@ import type { UpdateUserDto } from "./dto/update-user.dto";
 import { User } from "./entities/user.entity";
 import { AbilityFactory, Action } from "src/ability/ability.factory";
 import { ForbiddenError } from "@casl/ability";
+import { PrismaService } from "nestjs-prisma";
 
 @Injectable()
 export class UserService {
-	constructor(private abilityFactory: AbilityFactory) {}
-	create(createUserDto: CreateUserDto) {
-		return "This action adds a new user";
+	constructor(
+		private abilityFactory: AbilityFactory,
+		private prisma: PrismaService,
+	) {}
+	async create(createUserDto: CreateUserDto) {
+		try {
+			await this.prisma.user.create({
+				data: {
+					...createUserDto,
+					isAdmin: false,
+				},
+			});
+			return;
+		} catch (error) {
+			return;
+		}
 	}
 
-	findAll() {
-		return "This action returns all user";
+	async findAll() {
+		const users: User[] = await this.prisma.user.findMany();
+		return users;
 	}
 
-	findOne(id: number) {
-		const user = new User(); // pull from DB ( prisma )
-		// biome-ignore lint/style/noCommaOperator: <explanation>
-		(user.id = id), (user.orgId = 1), (user.isAdmin = false);
+	async findOne(username: string) {
+		const user: User = await this.prisma.user.findUniqueOrThrow({
+			where: {
+				username,
+			},
+		});
 		return user;
 	}
 
-	update(id: number, updateUserDto: UpdateUserDto, currentUser: User) {
+	async update(
+		username: string,
+		updateUserDto: UpdateUserDto,
+		currentUser: User,
+	) {
 		const currentUserAbility = this.abilityFactory.defineAbility(currentUser);
-		const userToUpdate = this.findOne(+id);
+		const userToUpdate = await this.findOne(username);
 
 		ForbiddenError.from(currentUserAbility).throwUnlessCan(
 			Action.UPDATE,
 			userToUpdate,
 		);
 
-		// update call DB
-		return `This action updates a #${id} user`; // correct response
+		const updatedUser = await this.prisma.user.update({
+			data: updateUserDto,
+			where: {
+				username,
+			},
+		});
+		return {
+			updatedUser,
+		};
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} user`;
+	async remove(id: number) {
+		await this.prisma.user.delete({
+			where: { id },
+		});
+		return;
 	}
 }

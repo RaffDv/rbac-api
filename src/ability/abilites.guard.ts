@@ -8,7 +8,7 @@ import { Reflector } from "@nestjs/core";
 import { AbilityFactory, Action } from "./ability.factory";
 import { CHECK_ABILITY, RequiredRule } from "./abilities.decorator";
 import { ForbiddenError } from "@casl/ability";
-import currentUser from "src/user/curent-user";
+import { User } from "src/user/entities/user.entity";
 
 @Injectable()
 export class abilitiesGuard implements CanActivate {
@@ -24,9 +24,16 @@ export class abilitiesGuard implements CanActivate {
 
 		console.log(rules);
 
-		// const {user}= context.switchToHttp().getRequest() // get user to auth
+		const { user } = context.switchToHttp().getRequest(); // get user to auth
+		console.log("request user", user);
 
-		const LoggedUser = currentUser;
+		const LoggedUser = new User();
+		(LoggedUser.username = "admin"),
+			(LoggedUser.first_name = "admin"),
+			(LoggedUser.id = 100),
+			// biome-ignore lint/style/noCommaOperator: <explanation>
+			(LoggedUser.isAdmin = false),
+			(LoggedUser.password = "12345senha");
 		const ability = this.caslAbilityFactory.defineAbility(LoggedUser);
 
 		try {
