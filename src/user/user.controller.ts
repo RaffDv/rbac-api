@@ -9,6 +9,7 @@ import {
 	HttpStatus,
 	ForbiddenException,
 	UseGuards,
+	Req,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { AbilityFactory, Action } from "src/ability/ability.factory";
@@ -21,8 +22,11 @@ import {
 	CheckAbilites,
 	ReadUserAbility,
 } from "src/ability/abilities.decorator";
+import { JWTAuthGuard } from "src/auth/jwt-auth.guard";
+import { abilitiesGuard } from "src/ability/abilites.guard";
 
 @Controller("user")
+@UseGuards(JWTAuthGuard)
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
@@ -54,6 +58,8 @@ export class UserController {
 		return this.userService.findOne(username);
 	}
 
+	// @UseGuards(JWTAuthGuard)
+	@UseGuards(abilitiesGuard)
 	@Patch(":username")
 	@CheckAbilites({
 		action: Action.UPDATE,
@@ -62,15 +68,10 @@ export class UserController {
 	update(
 		@Param("username") username: string,
 		@Body() updateUserDto: UpdateUserDto,
+		@Req() req,
 	) {
-		const LoggedUser = new User();
-		(LoggedUser.username = "admin"),
-			(LoggedUser.first_name = "admin"),
-			// biome-ignore lint/style/noCommaOperator: <explanation>
-			(LoggedUser.isAdmin = false),
-			(LoggedUser.password = "12345senha");
 		try {
-			return this.userService.update(username, updateUserDto, LoggedUser);
+			return this.userService.update(username, updateUserDto, req.user);
 		} catch (error) {
 			if (error instanceof ForbiddenError) {
 				throw new ForbiddenException(error.message);

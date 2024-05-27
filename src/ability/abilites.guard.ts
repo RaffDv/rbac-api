@@ -24,8 +24,8 @@ export class abilitiesGuard implements CanActivate {
 
 		console.log(rules);
 
-		const { user } = context.switchToHttp().getRequest(); // get user to auth
-		console.log("request user", user);
+		const request = context.switchToHttp().getRequest(); // get user to auth
+		console.log("request user", request.user); // return undefined!!
 
 		const LoggedUser = new User();
 		(LoggedUser.username = "admin"),

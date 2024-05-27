@@ -45,6 +45,8 @@ export class UserService {
 		updateUserDto: UpdateUserDto,
 		currentUser: User,
 	) {
+		console.log(currentUser);
+
 		const currentUserAbility = this.abilityFactory.defineAbility(currentUser);
 		const userToUpdate = await this.findOne(username);
 

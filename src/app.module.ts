@@ -6,7 +6,7 @@ import { AbilityModule } from "./ability/ability.module";
 import { APP_GUARD } from "@nestjs/core";
 import { abilitiesGuard } from "./ability/abilites.guard";
 import { PrismaModule } from "nestjs-prisma";
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
 	imports: [
@@ -20,10 +20,7 @@ import { AuthModule } from './auth/auth.module';
 	controllers: [AppController],
 	providers: [
 		AppService,
-		{
-			provide: APP_GUARD,
-			useClass: abilitiesGuard,
-		},
+		// S
 	],
 })
 export class AppModule {}
